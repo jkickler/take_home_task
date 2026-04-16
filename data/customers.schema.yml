@@ -1,0 +1,127 @@
+#   Schema of customers.csv:
+
+# - customer_id: Integer (Unique customer identifier)
+# - is_paying_customer: Boolean (true/false)
+# - returning_customer: String (Yes, No)
+# - completed_orders_count: Integer
+# - total_orders_count: Integer
+# - total_orders_value: Float
+# - date_created_utc: String (Registration timestamp)
+
+
+table: customers.csv
+database: local
+description: "E-commerce customer data with engagement metrics"
+
+entities:
+  - name: customer_id
+    description: "Individual customer"
+    sample: [259, 260, 261, 262]
+
+dimensions:
+  # Temporal Dimensions
+  - name: date_created_utc
+    description: "Date when customer was registered"
+    synonyms: ["date", "signup date", "created date"]
+    sample: ["2023-06-02 16:07:13.000000 UTC", "2025-11-20 23:38:41.000000 UTC", "2026-02-14 10:57:20.000000 UTC"]
+
+  # Customer Segmentation
+  - name: is_paying_customer
+    description: "Whether the customer has made a purchase"
+    synonyms: ["paying customer", "purchaser", "buyer", "paid user"]
+    sample: [true, false]
+
+  - name: returning_customer
+    description: "Whether the customer has returned for repeat business"
+    synonyms: ["returning", "repeat customer", "loyal customer", "return user"]
+    sample: ["Yes", "No"]
+
+  # Order Metrics
+  - name: completed_orders_count
+    description: "Number of successfully completed orders"
+    synonyms: ["completed orders", "finished orders", "successful orders", "orders completed"]
+    sample: [0, 1, 2]
+
+  - name: total_orders_count
+    description: "Total number of orders placed by customer"
+    synonyms: ["total orders", "orders count", "order count", "number of orders"]
+    sample: [0, 1, 2, 3]
+
+  - name: total_orders_value
+    description: "Total monetary value of all orders"
+    synonyms: ["order value", "total spend", "lifetime value", "revenue", "customer value"]
+    sample: [85.07, 62.0, 262.0, 42.0, 0.0]
+
+measures:
+  # Basic Count Measures
+  - name: total_customers
+    sql: count(*)
+
+  - name: paying_customers
+    sql: "count(case when is_paying_customer = true then 1 end)"
+
+  - name: non_paying_customers
+    sql: "count(case when is_paying_customer = false then 1 end)"
+
+  # Order Measures
+  - name: sum_total_orders
+    sql: sum(total_orders_count)
+
+  - name: sum_completed_orders
+    sql: sum(completed_orders_count)
+
+  - name: avg_orders_per_customer
+    sql: avg(total_orders_count)
+
+  - name: avg_completed_orders
+    sql: avg(completed_orders_count)
+
+  - name: incomplete_orders
+    sql: "sum(total_orders_count - completed_orders_count)"
+
+  # Value Measures
+  - name: total_revenue
+    sql: sum(total_orders_value)
+
+  - name: avg_customer_value
+    sql: avg(total_orders_value)
+
+  - name: max_customer_value
+    sql: max(total_orders_value)
+
+  - name: min_customer_value
+    sql: min(total_orders_value)
+
+  # Incomplete orders per customer
+  - name: count_not_converted_customers
+    sql: "count(case when total_orders_count > 0 and completed_orders_count = 0 then 1 end)"
+
+  # Rate Measures
+  - name: conversion_rate
+    sql: "count(case when is_paying_customer = true then 1 end) * 100.0 / count(*)"
+
+  - name: returning_rate
+    sql: "count(case when returning_customer = 'Yes' then 1 end) * 100.0 / count(*)"
+
+  # Tier Distribution
+  - name: vip_customers
+    sql: "count(case when completed_orders_count >= 5 then 1 end)"
+
+  - name: regular_customers
+    sql: "count(case when completed_orders_count >= 2 and completed_orders_count < 5 then 1 end)"
+
+  - name: new_customers
+    sql: "count(case when completed_orders_count = 1 then 1 end)"
+
+  - name: prospects
+    sql: "count(case when completed_orders_count = 0 or completed_orders_count is null then 1 end)"
+
+  # Revenue by Tier
+  - name: vip_revenue
+    sql: "sum(case when completed_orders_count >= 5 then total_orders_value else 0 end)"
+
+  - name: regular_customer_revenue
+    sql: "sum(case when completed_orders_count >= 2 and completed_orders_count < 5 then total_orders_value else 0 end)"
+
+  - name: new_customer_revenue
+    sql: "sum(case when completed_orders_count = 1 then total_orders_value else 0 end)"

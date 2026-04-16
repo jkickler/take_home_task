@@ -1,0 +1,176 @@
+#   Schema of orders.csv:
+
+# - order_id: Integer (Unique order identifier)
+# - customer_id: Integer (Customer identifier)
+# - order_status: String (completed, processing, pending, cancelled, on-hold)
+# - currency: String (EUR)
+# - created_via: String (checkout, admin)
+# - is_returning_order: String (Yes, No)
+# - billing_country: String (country code)
+# - shipping_country: String (country code)
+# - order_total: Float (Total order amount)
+# - total_tax: Float (Tax amount)
+# - discount_total: Float (Discount amount)
+# - shipping_total: Float (Shipping cost)
+# - date_created_utc: String (Order creation timestamp)
+# - date_paid_gmt: String (Payment timestamp)
+
+
+table: orders.csv
+database: local
+description: "E-commerce order data with financial and geographic dimensions"
+
+entities:
+  - name: order_id
+    description: "Individual order transaction"
+    sample: [1541, 1542, 1543, 1544]
+
+dimensions:
+
+  - name: customer_id
+    description: "Customer who placed the order"
+    sample: [259, 260, 261, 262]
+
+  # Temporal Dimensions
+  - name: date_created_utc
+    description: "Date when order was created"
+    synonyms: ["date", "order date", "created date"]
+    sample: ["2023-06-02 16:07:13.000000 UTC", "2025-11-20 23:38:41.000000 UTC"]
+
+  - name: date_paid_gmt
+    description: "Date when order was paid"
+    synonyms: ["paid date", "payment date"]
+    sample: ["2023-06-02 16:07:13.000000 UTC", "null"]
+
+  # Geographic Dimensions
+  - name: billing_country
+    description: "Country used for billing address"
+    synonyms: ["billing nation", "bill country"]
+    sample: ["de", "us", "fr", "gb"]
+
+  - name: shipping_country
+    description: "Country used for shipping address"
+    synonyms: ["shipping nation", "ship country"]
+    sample: ["de", "us", "fr", "gb"]
+
+  # Order Status Dimensions
+  - name: order_status
+    description: "Current status of the order"
+    synonyms: ["status", "order state"]
+    sample: ["completed", "processing", "pending", "cancelled", "on-hold"]
+
+  # Channel Dimensions
+  - name: created_via
+    description: "How the order was created"
+    synonyms: ["channel", "order channel", "source"]
+    sample: ["checkout", "admin"]
+
+  # Customer Type Dimensions
+  - name: is_returning_order
+    description: "Whether this is a returning customer order"
+    synonyms: ["returning", "repeat order"]
+    sample: ["Yes", "No"]
+
+  # Currency and Financial
+  - name: currency
+    description: "Currency code for the order"
+    synonyms: ["curr", "currency code"]
+    sample: ["EUR"]
+
+  - name: order_total
+    description: "Total order amount"
+    synonyms: ["order amount", "total amount", "gross amount"]
+    sample: [85.07, 62.0, 262.0, 42.0]
+
+  - name: total_tax
+    description: "Tax amount for the order"
+    synonyms: ["tax amount", "tax", "vat"]
+    sample: [0.0, 5.0, 10.5]
+
+  - name: discount_total
+    description: "Discount amount applied to the order"
+    synonyms: ["discount amount", "discount", "savings"]
+    sample: [0.0, 5.0, 10.0]
+
+  - name: shipping_total
+    description: "Shipping cost for the order"
+    synonyms: ["shipping cost", "shipping fee", "delivery cost"]
+    sample: [0.0, 5.0, 10.0]
+
+measures:
+
+  # Customer Measures
+  - name: customers_without_account
+    sql: "count(case when customer_id = '0' then 1 end)"
+
+  # Revenue Measures
+  - name: sum_total_revenue
+    sql: sum(order_total)
+
+  - name: sum_total_tax
+    sql: sum(total_tax)
+
+  - name: sum_total_discount
+    sql: sum(discount_total)
+
+  - name: sum_total_shipping
+    sql: sum(shipping_total)
+
+  - name: sum_net_revenue
+    sql: "sum(order_total) - sum(discount_total) - sum(total_tax) -sum(shipping_total)"
+
+  - name: average_order_value
+    sql: avg(order_total)
+
+  - name: max_order_value
+    sql: max(order_total)
+
+  - name: min_order_value
+    sql: min(order_total)
+
+  # Counting Measures
+  - name: total_orders
+    sql: count(*)
+
+  - name: completed_orders
+    sql: "count(case when order_status = 'completed' then 1 end)"
+
+  - name: cancelled_orders
+    sql: "count(case when order_status = 'cancelled' then 1 end)"
+
+  - name: pending_orders
+    sql: "count(case when order_status = 'pending' then 1 end)"
+
+  - name: processing_orders
+    sql: "count(case when order_status = 'processing' then 1 end)"
+
+  - name: unique_customers
+    sql: "count(distinct customer_id)"
+
+  # Rate Measures
+  - name: completion_rate
+    sql: "count(case when order_status = 'completed' then 1 end) * 100.0 / count(*)"
+
+  - name: cancellation_rate
+    sql: "count(case when order_status = 'cancelled' then 1 end) * 100.0 / count(*)"
+
+  - name: checkout_rate
+    sql: "count(case when created_via = 'checkout' then 1 end) * 100.0 / count(*)"
+
+  - name: returning_customer_rate
+    sql: "count(case when is_returning_order = 'Yes' then 1 end) * 100.0 / count(*)"
+
+  - name: discount_rate
+    sql: "sum(discount_total) * 100.0 / sum(order_total)"
+
+  # Country-level Measures
+  - name: orders_by_country
+    sql: "count(case when billing_country is not null then 1 end)"
+
+  - name: total_revenue_by_country
+    sql: |
+     "SELECT billing_country, sum(order_total) as revenue FROM orders GROUP BY billing_country"
+
+  - name: net_revenue_by_country
+    sql: |
+     "SELECT billing_country, sum(order_total) - sum(discount_total) - sum(total_tax) -sum(shipping_total) as net_revenue FROM orders GROUP BY billing_country"

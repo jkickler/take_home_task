@@ -1,0 +1,4 @@
+.env
+.databases/
+.db/
+doc/

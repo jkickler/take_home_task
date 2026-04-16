@@ -1,0 +1,13 @@
+defaults:
+  database: local
+
+models:
+  - name: openai-5
+    vendor: openai
+    model_ref: gpt-5.4-mini
+    key_var: OPENAI_API_KEY
+
+databases:
+  - name: local
+    dataset: ./.db
+    type: duckdb

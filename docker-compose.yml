@@ -1,0 +1,12 @@
+services:
+  oxy:
+    image: ghcr.io/oxy-hq/oxy:latest
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - ./.databases:/workspace/.databases
+    env_file:
+      - .env
+    environment:
+      - OXY_STATE_DIR=/workspace/.databases
+    command: ["sleep", "infinity"]
