@@ -8,7 +8,6 @@
 # - total_orders_value: Float
 # - date_created_utc: String (Registration timestamp)
 
-
 table: customers.csv
 database: local
 description: "E-commerce customer data with engagement metrics"

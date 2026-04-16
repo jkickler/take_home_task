@@ -15,7 +15,6 @@
 # - date_created_utc: String (Order creation timestamp)
 # - date_paid_gmt: String (Payment timestamp)
 
-
 table: orders.csv
 database: local
 description: "E-commerce order data with financial and geographic dimensions"

@@ -44,16 +44,21 @@ docker compose down
 | `docker compose down` | Stop the container |
 
 ## Project Structure
-
-- `config.yml` - Oxy configuration with database and model settings
-- `my-agent.agent.yml` - Agent definition for e-commerce analytics
-- `data/*.schema.yml` - Semantic models for customers and orders
-- `.db/` - CSV data files (mounted into container)
-- `.databases/` - DuckDB database files (persisted)
+```
+├── docker-compose.yml       # Container orchestration
+├── config.yml               # Application configuration
+├── semantics.yml            # Semantic layer definitions
+├── my-agent.agent.yml       # AI agent definition
+├── data/                    # Database schema definitions
+│   ├── customers.schema.yml
+│   └── orders.schema.yml
+├── .db/                     # Sample data (CSV files, auto-loaded by DuckDB)
+├── .env.example             # Environment variable template
+└── README.md
+```
 
 ## Application Notes
 
-- Data is persisted in `./.databases/` directory
 - The application uses DuckDB (file-based, no separate DB service needed)
 - Requires an OpenAI API key
 
@@ -428,3 +433,4 @@ Given more time, the following features would improve the application:
 | **Error Messages** | Sometimes cryptic, requiring log checking to understand issues |
 | **Agent Memory** | No built-in memory—agent cannot remember context from previous queries in a session |
 | **Session Management** | No native session persistence|
+| **Prompt Injection Prevention** | Only system prompt guardrails, no further measures possible |
