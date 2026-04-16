@@ -77,6 +77,9 @@ Implemented a tier system based on `completed_orders_count` for better customer 
 - Orders with `customer_id = "0"` represent guest checkouts (no registered account)
 
 ## Sample test queries
+
+The full agent output is copied under each test query.
+
 ### Verification Queries
 
 #### 1. List the top 3 Billing Countries by Order Total.
