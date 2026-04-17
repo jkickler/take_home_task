@@ -47,12 +47,11 @@ docker compose down
 ```
 ├── docker-compose.yml       # Container orchestration
 ├── config.yml               # Application configuration
-├── semantics.yml            # Semantic layer definitions
 ├── my-agent.agent.yml       # AI agent definition
-├── data/                    # Database schema definitions
+├── data/                    # Schema definitions
 │   ├── customers.schema.yml
 │   └── orders.schema.yml
-├── .db/                     # Sample data (CSV files, auto-loaded by DuckDB)
+├── .db/                     # Sample data (CSV files)
 ├── .env.example             # Environment variable template
 └── README.md
 ```
@@ -410,12 +409,18 @@ Given more time, the following features would improve the application:
 
 | Area | Improvement |
 |------|-------------|
-| **User Interface** | Usage of Oxy's web UI and integration of interactive dashboards with graphs for common requests (customer tiers, revenue by country) |
+| **User Interface** | Usage of Oxy's web UI |
+|**Interactive Dashboards** | Integration of interactive dashboards with graphs for common requests (customer tiers, revenue by country) |
 | **Testing** | Implementation of query consistency testing |
 | **Output Quality** | Refinement of prompts to return clean results without printing planning steps or SQL queries |
 ---
 
 ## Problems Encountered & Solutions
+
+ - General problem was the documentation, which was sometimes confusing or incomplete. 
+ - Furthermore the provided oxy demo project contained elements, which are not mentioned in the documentation, e.g. the documentation highlights 3 different agentic tools, but the demo project uses far more tools.
+
+Below is a list of the main technical problems encountered and their solutions:
 
 | Problem | Solution |
 |---------|----------|
@@ -430,7 +435,8 @@ Given more time, the following features would improve the application:
 | Area | Limitation |
 |------|------------|
 | **Debugging** | No step-by-step execution flow visible; only log files available for troubleshooting |
+|**LLM Parameters**|No option to adjust parameters like temperature or max tokens|
 | **Error Messages** | Sometimes cryptic, requiring log checking to understand issues |
-| **Agent Memory** | No built-in memory—agent cannot remember context from previous queries in a session |
-| **Session Management** | No native session persistence|
+| **Agent Memory** | No built-in memory, cannot remember context from previous queries in a session |
+| **Session Management** | No session persistence|
 | **Prompt Injection Prevention** | Only system prompt guardrails, no further measures possible |
